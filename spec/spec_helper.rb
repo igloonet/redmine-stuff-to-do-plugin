@@ -82,3 +82,49 @@ module AssociationMatcher
 end
 
 include AssociationMatcher
+
+describe 'get_time_grid_data', :shared => true do
+  it 'should set @date for the view' do
+    do_request
+    assigns[:date].should_not be_nil
+  end
+
+  it 'should set @calendar for the view' do
+    do_request
+    assigns[:calendar].should_not be_nil
+  end
+
+  it 'should set @issues for the view' do
+    do_request
+    assigns[:issues].should_not be_nil
+  end
+
+  it 'should set @time_entry for the view' do
+    do_request
+    assigns[:time_entry].should_not be_nil
+  end
+
+  it 'should get the issues and time entries for the user in the date range' do
+    # Redmine uses dates based on language settings
+    first_workday = (l(:general_first_day_of_week).to_i - 1)%7 + 1
+    last_workday = (first_workday + 5)%7 + 1
+    date = Date.today
+    date_from = date - (date.cwday - first_workday)%7
+    date_to = date + (last_workday - date.cwday)%7
+
+    project = mock_model(Project, :name => 'ABC Test')
+    issues = [
+              mock_model(Issue, :project => project, :subject => 'Testing', :time_entries => []),
+              mock_model(Issue, :project => project, :subject => 'Testing', :time_entries => [])
+             ]
+    User.current.should_receive(:time_grid_issues).and_return(Issue)
+    Issue.should_receive(:visible).at_least(:once).and_return(Issue)
+    Issue.should_receive(:all).
+      with(:order => "#{Issue.table_name}.id ASC").
+      and_return(issues)
+                                                          
+    do_request
+  end
+
+end
+

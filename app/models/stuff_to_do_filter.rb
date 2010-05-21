@@ -27,11 +27,6 @@ class StuffToDoFilter
   private
   # Wrapper around Redmine's API since Enumerations changed in r2472
   def get_priorites
-    IssuePriority.all
-#    if Enumeration.respond_to?(:priorities)
-#      return Enumeration.priorities
-#    else
-#      return Enumeration::get_values('IPRI')
-#    end
+    RedmineStuffToDo::StuffToDoCompatibility::IssuePriority.all
   end
 end

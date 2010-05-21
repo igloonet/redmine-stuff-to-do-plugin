@@ -9,10 +9,11 @@ The Stuff To Do plugin allows a user to order and prioritize the issues and proj
 * Editing other user lists for Administrators
 * Filtering of issues based on user, priority, or status
 * Notification emails based on low workload counts
+* Drag and drop time logging using the Time Grid
 
 == Getting the plugin
 
-A copy of the plugin can be downloaded from {Little Stream Software}[https://projects.littlestreamsoftware.com/projects/list_files/redmine-stuff-to-do] or from {GitHub}[http://github.com/edavis10/redmine-stuff-to-do/tree/master]
+A copy of the plugin can be downloaded from {Little Stream Software}[https://projects.littlestreamsoftware.com/projects/redmine-stuff-to-do/files] or from {GitHub}[http://github.com/edavis10/redmine-stuff-to-do]
 
 
 == Installation and Setup

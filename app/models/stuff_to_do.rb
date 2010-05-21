@@ -41,51 +41,35 @@ class StuffToDo < ActiveRecord::Base
   
   # Filters the issues that are available to be added for a user.
   #
-  # A filter can be:
+  # A filter can be a record:
   #
-  # * :user - issues are assigned to this user
-  # * :status - issues with this status
-  # * :priority - issues with this priority
+  # * User - issues are assigned to this user
+  # * IssueStatus - issues with this status
+  # * IssuePriority - issues with this priority
   #
-  def self.available(user, filter = { })
-    if filter.nil? || filter.empty?
-      return []
-    elsif filter[:user]
-      user = filter[:user]
-      issues = Issue.find(:all,
-                          :include => [:status, :project],
-                          :conditions => ["assigned_to_id = ? AND #{IssueStatus.table_name}.is_closed = ? AND #{IssueStatus.table_name}.id <> 4 AND #{IssueStatus.table_name}.id <> 8 AND #{Project.table_name}.status <> ?",user.id, false, 9],
-                          :order => 'issues.created_on DESC')
-    elsif filter[:status]
-      status = filter[:status]
-      issues = Issue.find(:all,
-                          :include => [:status, :project],
-                          :conditions => ["#{IssueStatus.table_name}.id = (?) AND #{IssueStatus.table_name}.is_closed = ? AND #{IssueStatus.table_name}.id <> 4 AND #{IssueStatus.table_name}.id <> 8 AND #{Project.table_name}.status <> ?", status.id, false, 9],
-                          :order => 'issues.created_on DESC')
-    elsif filter[:priority]
-      priority = filter[:priority]
-      issues = Issue.find(:all,
-                          :include => [:status, :priority, :project],
-                          :conditions => ["#{Enumeration.table_name}.id = (?) AND #{IssueStatus.table_name}.is_closed = ? AND #{IssueStatus.table_name}.id <> 4 AND #{IssueStatus.table_name}.id <> 8 AND #{Project.table_name}.status <> ?", priority.id, false, 9],
-                          :order => 'issues.created_on DESC')
-    elsif filter[:projects]
-      # TODO: remove 'issues' naming
-      issues = active_and_visible_projects.sort
-    end
-    next_issues = StuffToDo.find(:all, :conditions => { :user_id => user.id }).collect(&:stuff)
+  def self.available(user, filter=nil)
+    return [] if filter.blank?
 
+    if filter.is_a?(Project)
+      potential_stuff_to_do = active_and_visible_projects.sort
+    else
+      potential_stuff_to_do = Issue.find(:all,
+                                         :include => [:status, :priority, :project],
+                                         :conditions => conditions_for_available(filter),
+                                         :order => "#{Issue.table_name}.created_on DESC")
+    end
+
+    stuff_to_do = StuffToDo.find(:all, :conditions => { :user_id => user.id }).collect(&:stuff)
     
-    return issues - next_issues
+    return potential_stuff_to_do - stuff_to_do
   end
 
   def self.using_projects_as_items?
-    using = USE.index(Setting.plugin_stuff_to_do_plugin['use_as_stuff_to_do'])
-    using == 'All' || using  == 'Only Projects'
+    ['All', 'Only Projects'].include?(use_setting)
   end
 
   def self.using_issues_as_items?
-    using = USE.index(Setting.plugin_stuff_to_do_plugin['use_as_stuff_to_do'])
-    using == 'All' || using  == 'Only Issues'
+    ['All', 'Only Issues'].include?(use_setting)
   end
 
   # Callback used to destroy all StuffToDos when an object is removed and
@@ -201,5 +185,27 @@ class StuffToDo < ActiveRecord::Base
     else
       return ::Project.find(:all, :conditions => Project.visible_by)
     end
+  end
+
+  def self.use_setting
+    USE.index(Setting.plugin_stuff_to_do_plugin['use_as_stuff_to_do'])
+  end
+
+  def self.conditions_for_available(filter_by)
+    conditions_builder = ARCondition.new(["#{IssueStatus.table_name}.is_closed = ?", false ])
+    conditions_builder.add(["#{Project.table_name}.status = ?", Project::STATUS_ACTIVE])
+
+    case 
+    when filter_by.is_a?(User)
+      conditions_builder.add(["assigned_to_id = ?", filter_by.id])
+    when filter_by.is_a?(IssueStatus), filter_by.is_a?(Enumeration)
+      table_name = filter_by.class.table_name
+      conditions_builder.add(["#{table_name}.id = (?)", filter_by.id])
+    end
+   
+    # ares individual conditions
+    conditions_builder.add(["#{IssueStatus.table_name}.id <> 4 AND #{IssueStatus.table_name}.id <> 8 AND #{Project.table_name}.status <> ?",9])
+
+    conditions_builder.conditions
   end
 end
