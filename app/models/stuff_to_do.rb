@@ -53,21 +53,21 @@ class StuffToDo < ActiveRecord::Base
     elsif filter[:user]
       user = filter[:user]
       issues = Issue.find(:all,
-                          :include => :status,
-                          :conditions => ["assigned_to_id = ? AND #{IssueStatus.table_name}.is_closed = ?",user.id, false ],
-                          :order => 'created_on DESC')
+                          :include => [:status, :project],
+                          :conditions => ["assigned_to_id = ? AND #{IssueStatus.table_name}.is_closed = ? AND #{IssueStatus.table_name}.id <> 4 AND #{IssueStatus.table_name}.id <> 8 AND #{Project.table_name}.status <> ?",user.id, false, 9],
+                          :order => 'issues.created_on DESC')
     elsif filter[:status]
       status = filter[:status]
       issues = Issue.find(:all,
-                          :include => :status,
-                          :conditions => ["#{IssueStatus.table_name}.id = (?) AND #{IssueStatus.table_name}.is_closed = ?", status.id, false ],
-                          :order => 'created_on DESC')
+                          :include => [:status, :project],
+                          :conditions => ["#{IssueStatus.table_name}.id = (?) AND #{IssueStatus.table_name}.is_closed = ? AND #{IssueStatus.table_name}.id <> 4 AND #{IssueStatus.table_name}.id <> 8 AND #{Project.table_name}.status <> ?", status.id, false, 9],
+                          :order => 'issues.created_on DESC')
     elsif filter[:priority]
       priority = filter[:priority]
       issues = Issue.find(:all,
-                          :include => [:status, :priority],
-                          :conditions => ["#{Enumeration.table_name}.id = (?) AND #{IssueStatus.table_name}.is_closed = ?", priority.id, false ],
-                          :order => 'created_on DESC')
+                          :include => [:status, :priority, :project],
+                          :conditions => ["#{Enumeration.table_name}.id = (?) AND #{IssueStatus.table_name}.is_closed = ? AND #{IssueStatus.table_name}.id <> 4 AND #{IssueStatus.table_name}.id <> 8 AND #{Project.table_name}.status <> ?", priority.id, false, 9],
+                          :order => 'issues.created_on DESC')
     elsif filter[:projects]
       # TODO: remove 'issues' naming
       issues = active_and_visible_projects.sort
