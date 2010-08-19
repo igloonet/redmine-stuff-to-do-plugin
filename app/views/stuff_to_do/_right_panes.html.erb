@@ -11,6 +11,18 @@
       <% end %>
     </ol>
 
+    <hr>
+
+    <ol id="will_be_available">
+      <% unless @will_be_available.empty? %>
+      <%= render :partial => 'item', :collection => @will_be_available %>
+      <% else %>
+      <li class="empty-list">
+        <%= l(:stuff_to_do_drag_issue_remove_list) %>
+      </li>
+      <% end %>
+    </ol>
+
     <div class="pane-summary">
       <div id="available-total-progress">
         <%= progress_bar_sum(@available, :done_ratio, { :width => '200px', :legend =>  l(:stuff_to_do_text_total_progress) }) %>

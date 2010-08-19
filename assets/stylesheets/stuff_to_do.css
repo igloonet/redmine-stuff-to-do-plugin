@@ -1,6 +1,7 @@
 #ajax-indicator { z-index: 300; }
 div.calendar {z-index: 200; }
-ol#available { overflow-y:auto; height: 500px; }
+ol#available { overflow-y:auto; height: 400px; }
+ol#will_be_available { overflow-y:auto; height: 100px; }
 ol#recommended { overflow-y:auto; height: 300px; }
 li.issue, li.project { cursor: move; }
 li.project { font-weight: bold; }
@@ -15,7 +16,7 @@ div.menu { float:right; text-align: right; }
 .drop-accepted { background-color:#FFFFEE; height: 16px; width: 100%; border: 1px solid #000000; }
 
 div.issue-details, div.project-details { position:relative; display:inline; float:left; width:71%; margin: 0 .5%; }
-div.estimate { position:relative; float:left; display: inline; width: 6%; margin: 0; text-align: center; }
+div.estimate { position:relative; float:left; display: inline; width: 6%; margin: 0; text-align: center; font-size: 10px; }
 div.progress { position:relative; float:left; display:inline; width: 17%; margin: 0 0 0 .5%; }
 
 div.pane-summary { text-align: right; }
@@ -213,4 +214,10 @@ input.save-time-grid { float: right; margin-top: 10px; margin-bottom: 10px; }
 * html #facebox_overlay { /* ie6 hack */
   position: absolute;
   height: expression(document.body.scrollHeight > document.body.offsetHeight ? document.body.scrollHeight : document.body.offsetHeight + 'px');
+}
+
+#panes p.pourcent{
+  position: absolute;
+  top: 3px;
+  padding-left: 6px;
 }

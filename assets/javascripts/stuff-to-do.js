@@ -36,9 +36,25 @@ jQuery(function($) {
       receive : function (event, ui) { removeItemFromTimeGridIfNeeded(event,ui);}
     });
 
+    $("#will_be_available").sortable({
+        cancel: 'a',
+        connectWith: ["#doing-now", "#recommended", "#time-grid-table tbody"],
+        placeholder: 'drop-accepted',
+        dropOnEmpty: true,
+        update : function (event, ui) {
+            if ($('#will_be_available li.issue').length > 0) {
+                $("#will_be_available li.empty-list").hide();
+            } else {
+                $("#will_be_available li.empty-list").show();
+            }
+        },
+      receive : function (event, ui) { removeItemFromTimeGridIfNeeded(event,ui);}
+    });
+
+
     $("#doing-now").sortable({
         cancel: 'a',
-        connectWith: ["#available", "#recommended", "#time-grid-table tbody"],
+        connectWith: ["#available", "#recommended", "#time-grid-table tbody", "#will_be_available"],
         dropOnEmpty: true,
         placeholder: 'drop-accepted',
         update : function (event, ui) { saveOrder(ui); },
@@ -47,7 +63,7 @@ jQuery(function($) {
 
     $("#recommended").sortable({
         cancel: 'a',
-        connectWith: ["#available", "#doing-now", "#time-grid-table tbody"],
+        connectWith: ["#available", "#doing-now", "#time-grid-table tbody", "#will_be_available"],
         dropOnEmpty: true,
         placeholder: 'drop-accepted',
         update : function (event, ui) { saveOrder(ui); },
@@ -55,7 +71,7 @@ jQuery(function($) {
     });
 
     $("#time-grid-table tbody").sortable({
-        connectWith: ["#available", "#doing-now", "#recommended"],
+        connectWith: ["#available", "#doing-now", "#recommended", "#will_be_available"],
         items: 'tr',
         placeholder: 'drop-accepted',
         // Cancel the drag and drop if it's reordering itself

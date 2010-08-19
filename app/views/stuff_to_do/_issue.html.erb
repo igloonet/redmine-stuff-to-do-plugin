@@ -6,11 +6,12 @@
         <%= h(issue.subject) %>
         </div>
 
+        <% start = issue.start_date.nil? ? '' : I18n.localize(issue.start_date, :format => :short) %>
+        <div class="progress"><%= progress_bar(issue.done_ratio, :width => '100%', :legend => start) %></div>
+
         <% if issue.estimated_hours && issue.estimated_hours > 0 %>
         <div class="estimate"><%= h(l_hours(issue.estimated_hours)) %> &nbsp;</div>
         <% end %>
-
-        <div class="progress"><%= progress_bar(issue.done_ratio, :width => '100%') %></div>
 
         <div style="clear:left;"></div>
       </li>

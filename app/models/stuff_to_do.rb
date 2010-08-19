@@ -64,6 +64,24 @@ class StuffToDo < ActiveRecord::Base
     return potential_stuff_to_do - stuff_to_do
   end
 
+  # ares finder
+  def self.will_be_available(user, filter=nil)
+    return [] if filter.blank?
+
+    if filter.is_a?(Project)
+      potential_stuff_to_do = active_and_visible_projects.sort
+    else
+      potential_stuff_to_do = Issue.find(:all,
+                                         :include => [:status, :priority, :project],
+                                         :conditions => conditions_for_will_be_available(filter),
+                                         :order => "#{Issue.table_name}.start_date ASC")
+    end
+
+    stuff_to_do = StuffToDo.find(:all, :conditions => { :user_id => user.id }).collect(&:stuff)
+    
+    return potential_stuff_to_do - stuff_to_do
+  end
+
   def self.using_projects_as_items?
     ['All', 'Only Projects'].include?(use_setting)
   end
@@ -205,7 +223,28 @@ class StuffToDo < ActiveRecord::Base
    
     # ares individual conditions
     conditions_builder.add(["#{IssueStatus.table_name}.id NOT IN (3,4,8) AND #{Project.table_name}.status <> ?",9])
+    conditions_builder.add(["#{Issue.table_name}.start_date <= ? OR #{Issue.table_name}.start_date IS NULL", Date.today])
 
     conditions_builder.conditions
   end
+
+  def self.conditions_for_will_be_available(filter_by)
+    conditions_builder = ARCondition.new(["#{IssueStatus.table_name}.is_closed = ?", false ])
+    conditions_builder.add(["#{Project.table_name}.status = ?", Project::STATUS_ACTIVE])
+
+    case 
+    when filter_by.is_a?(User)
+      conditions_builder.add(["assigned_to_id = ?", filter_by.id])
+    when filter_by.is_a?(IssueStatus), filter_by.is_a?(Enumeration)
+      table_name = filter_by.class.table_name
+      conditions_builder.add(["#{table_name}.id = (?)", filter_by.id])
+    end
+   
+    # ares individual conditions
+    conditions_builder.add(["#{IssueStatus.table_name}.id NOT IN (3,4,8) AND #{Project.table_name}.status <> ?",9])
+    conditions_builder.add(["#{Issue.table_name}.start_date > ? AND #{Issue.table_name}.start_date IS NOT NULL", Date.today])
+
+    conditions_builder.conditions
+  end
+
 end

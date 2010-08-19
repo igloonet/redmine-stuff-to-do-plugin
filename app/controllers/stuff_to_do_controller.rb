@@ -11,8 +11,11 @@ class StuffToDoController < ApplicationController
     @doing_now = StuffToDo.doing_now(@user)
     @recommended = StuffToDo.recommended(@user)
     @available = StuffToDo.available(@user, default_filters )
+    @will_be_available = StuffToDo.will_be_available(@user, default_filters )
     
-    @users = User.active
+    #@users = User.active
+    @users = User.active.all(:include => :custom_values,
+      :conditions => ['users.status = ? AND custom_values.custom_field_id = 16 AND custom_values.value = 1', User::STATUS_ACTIVE])
     @filters = filters_for_view
   end
   
@@ -21,6 +24,7 @@ class StuffToDoController < ApplicationController
     @doing_now = StuffToDo.doing_now(@user)
     @recommended = StuffToDo.recommended(@user)
     @available = StuffToDo.available(@user, get_filters )
+    @will_be_available = StuffToDo.will_be_available(@user, default_filters )
 
     respond_to do |format|
       format.html { redirect_to :action => 'index'}
@@ -30,6 +34,7 @@ class StuffToDoController < ApplicationController
   
   def available_issues
     @available = StuffToDo.available(@user, get_filters)
+    @will_be_available = StuffToDo.will_be_available(@user, default_filters )
 
     respond_to do |format|
       format.html { redirect_to :action => 'index'}
