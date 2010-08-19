@@ -204,7 +204,7 @@ class StuffToDo < ActiveRecord::Base
     end
    
     # ares individual conditions
-    conditions_builder.add(["#{IssueStatus.table_name}.id <> 4 AND #{IssueStatus.table_name}.id <> 8 AND #{Project.table_name}.status <> ?",9])
+    conditions_builder.add(["#{IssueStatus.table_name}.id NOT IN (3,4,8) AND #{Project.table_name}.status <> ?",9])
 
     conditions_builder.conditions
   end

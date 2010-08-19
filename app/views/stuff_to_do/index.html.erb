@@ -6,11 +6,11 @@
 </div>
 
 <div class="menu">
-  <% if User.current.admin? %>
+  <% if User.current.admin? || User.current.is_manager?  %>
   <div class="user">
     <% form_tag({ :controller => 'stuff_to_do', :action => 'index'}, :method => :get, :id => 'user_switch' ) do  %>
     <label for="user_id"><%= l(:stuff_to_do_label_view_user_list) %></label>
-    <%= collection_select(:user, :id, @users.sort, :id, :name, { }, { :name => 'user_id'}) %>
+    <%= collection_select(:user, :id, User.current.admin? ? @users.sort : User.current.managed_users.sort, :id, :name, { }, { :name => 'user_id'}) %>
     <% end %>
   </div>
 
@@ -42,3 +42,7 @@
   <%= javascript_tag("var user_id = #{@user.id};") %>
   <%= javascript_tag "window._token = '#{form_authenticity_token}'" %>
 <% end %>
+
+<div id="list-top">
+  <%= render :partial => "my/blocks/time_entry_overview", :locals => { :user => @user } %>
+</div>

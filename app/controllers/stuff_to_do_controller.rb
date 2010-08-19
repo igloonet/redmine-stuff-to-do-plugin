@@ -86,7 +86,7 @@ class StuffToDoController < ApplicationController
     render_403 unless User.current.logged?
     
     if params[:user_id] && params[:user_id] != User.current.id.to_s
-      if User.current.admin?
+      if User.current.admin? || User.current.is_manager?
         @user = User.find(params[:user_id])
       else
         render_403
