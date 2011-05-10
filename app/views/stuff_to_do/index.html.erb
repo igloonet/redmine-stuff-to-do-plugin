@@ -10,7 +10,7 @@
   <div class="user">
     <% form_tag({ :controller => 'stuff_to_do', :action => 'index'}, :method => :get, :id => 'user_switch' ) do  %>
     <label for="user_id"><%= l(:stuff_to_do_label_view_user_list) %></label>
-    <%= collection_select(:user, :id, User.current.admin? ? @users.sort : User.current.managed_users.sort, :id, :name, { }, { :name => 'user_id'}) %>
+    <%= collection_select(:user, :id, User.current.admin? ? (@users) : (User.current.managed_users.sort {|a,b| a.name(:lastname_firstname) <=> b.name(:lastname_firstname)} ), :id, :name_reversed, { }, { :name => 'user_id'}) %>
     <% end %>
   </div>
 

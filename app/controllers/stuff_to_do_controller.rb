@@ -15,7 +15,8 @@ class StuffToDoController < ApplicationController
     
     #@users = User.active
     @users = User.active.all(:include => :custom_values,
-      :conditions => ['users.status = ? AND custom_values.custom_field_id = 16 AND custom_values.value = 1', User::STATUS_ACTIVE])
+      :conditions => ['users.status = ? AND custom_values.custom_field_id = 16 AND custom_values.value = 1', User::STATUS_ACTIVE],
+      :order => :lastname)
     @filters = filters_for_view
   end
   
