@@ -1,3 +1,4 @@
+
 <% html_title(l(:stuff_to_do_title)) %>
 <h1><%= l(:stuff_to_do_title) %></h1>
 
@@ -6,21 +7,24 @@
 </div>
 
 <div class="menu">
-  <% if User.current.admin? || User.current.is_manager?  %>
+
+  <% if User.current.allowed_to?(:view_others_stuff_to_do, @project, :global => true) || User.current.admin? || User.current.is_manager? %>
   <div class="user">
-    <% form_tag({ :controller => 'stuff_to_do', :action => 'index'}, :method => :get, :id => 'user_switch' ) do  %>
+    <%= form_tag({ :controller => 'stuff_to_do', :action => 'index'}, :method => :get, :id => 'user_switch' ) do  %>
     <label for="user_id"><%= l(:stuff_to_do_label_view_user_list) %></label>
     <%= collection_select(:user, :id, User.current.admin? ? (@users) : (User.current.managed_users.sort {|a,b| a.name(:lastname_firstname) <=> b.name(:lastname_firstname)} ), :id, :name_reversed, { }, { :name => 'user_id'}) %>
     <% end %>
   </div>
-
+  <% else %>
+  	<%= hidden_field_tag "user_id", @user.id %>
+	<% end %>
+	
   <div class="filter">
-    <% form_tag({}, :id => 'filter_form') do %>
+    <%= form_tag({}, :id => 'filter_form') do %>
     <label for="filter"><%= l(:stuff_to_do_label_filter) %></label>
     <%= select_tag("filter", filter_options(@filters, params[:filter])) %>
     <% end %>
   </div>
-  <% end %>
 </div>
 <div style="clear:right;"></div>
 
@@ -28,7 +32,29 @@
 
 <div style="clear:both;"></div>
 
+
 <%= render :partial => 'time_grid' if !Setting.plugin_stuff_to_do_plugin['use_time_grid'].blank? && Setting.plugin_stuff_to_do_plugin['use_time_grid'] != "0" %>
+
+<% other_formats_links do |f| %>
+  <%= f.link_to 'CSV', :url => params, :onclick => "showModal('csv-export-options', '330px'); return false;" %>
+<% end %>
+
+<div id="csv-export-options" style="display:none;">
+  <h3 class="title"><%= l(:label_export_options, :export_format => 'CSV') %></h3>
+  <%= form_tag(params.merge({:format => 'csv',:page=>nil}), :method => :get, :id => 'csv-export-form') do %>
+  <% if User.current.allowed_to?(:view_others_stuff_to_do, @project, :global => true) %>
+		  <label for="user_id"><%= l(:stuff_to_do_label_view_user_list) %></label>
+		    <%= collection_select(:user, :id, @users.sort, :id, :name, { }, { :name => 'user_id'}) %>
+  <% end %>
+  
+  <label><%= check_box_tag 'available', '1', '1' %> <%= l(:stuff_to_do_what_is_available) %></label>
+  </p>
+  <p class="buttons">
+    <%= submit_tag l(:button_export), :name => nil, :onclick => "hideModal(this);" %>
+    <%= submit_tag l(:button_cancel), :name => nil, :onclick => "hideModal(this);", :type => 'button' %>
+  </p>
+  <% end %>
+</div>
 
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag "stuff_to_do.css", :plugin => "stuff_to_do_plugin", :media => 'all' %>
