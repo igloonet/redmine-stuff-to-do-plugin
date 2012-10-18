@@ -272,29 +272,30 @@ class StuffToDo < ActiveRecord::Base
     end
    
     # ares individual conditions
-    conditions<< "#{IssueStatus.table_name}.id NOT IN (3,4,8) AND #{Project.table_name}.status <> 9"
-    conditions<< "#{Issue.table_name}.start_date <= #{Date.today.to_s(:db)} OR #{Issue.table_name}.start_date IS NULL"
+    conditions<< " AND #{IssueStatus.table_name}.id NOT IN (3,4,8) AND #{Project.table_name}.status <> 9 "
+    conditions<< " AND #{Issue.table_name}.start_date <= #{Date.today.to_s(:db)} OR #{Issue.table_name}.start_date IS NULL "
 
     conditions
   end
 
   def self.conditions_for_will_be_available(filter_by)
-    conditions_builder = ARCondition.new(["#{IssueStatus.table_name}.is_closed = ?", false ])
-    conditions_builder.add(["#{Project.table_name}.status = ?", Project::STATUS_ACTIVE])
+    scope = self
+    conditions = "#{IssueStatus.table_name}.is_closed = false"
+    conditions << " AND (" << "#{Project.table_name}.status = %d" % Project::STATUS_ACTIVE << ")"
 
     case 
     when filter_by.is_a?(User)
-      conditions_builder.add(["assigned_to_id = ?", filter_by.id])
+      conditions << " AND (" << "assigned_to_id = %d" % filter_by.id << ")"
     when filter_by.is_a?(IssueStatus), filter_by.is_a?(Enumeration)
       table_name = filter_by.class.table_name
-      conditions_builder.add(["#{table_name}.id = (?)", filter_by.id])
+      conditions << " AND (" << "#{table_name}.id = (%d)" % filter_by.id << ")"
     end
    
     # ares individual conditions
-    conditions_builder.add(["#{IssueStatus.table_name}.id NOT IN (3,4,8) AND #{Project.table_name}.status <> ?",9])
-    conditions_builder.add(["#{Issue.table_name}.start_date > ? AND #{Issue.table_name}.start_date IS NOT NULL", Date.today])
+    conditions << " AND #{IssueStatus.table_name}.id NOT IN (3,4,8) AND #{Project.table_name}.status <> 9 "
+    conditions << " AND #{Issue.table_name}.start_date > #{Date.today.to_s(:db)} AND #{Issue.table_name}.start_date IS NOT NULL "
 
-    conditions_builder.conditions
+    conditions
   end
 
 end

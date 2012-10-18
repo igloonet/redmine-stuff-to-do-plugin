@@ -16,6 +16,7 @@ class StuffToDoController < ApplicationController
     #@users = User.active
     @users = StuffToDoReportee.reportees_for(User.current)
     @users << User.current unless @users.include?(User.current)
+    @will_be_available = StuffToDo.will_be_available(@user, default_filters )
     @filters = filters_for_view
     
     respond_to do |format|
