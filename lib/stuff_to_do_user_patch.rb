@@ -6,5 +6,9 @@ module StuffToDoUserPatch
       has_and_belongs_to_many :time_grid_issues, :class_name => 'Issue', :join_table => 'time_grid_issues_users'
     end
   end
+
+  def name_reversed
+    self.name(:lastname_firstname)
+  end
 end
 
