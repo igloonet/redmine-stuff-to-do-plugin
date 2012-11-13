@@ -75,7 +75,7 @@ class StuffToDo < ActiveRecord::Base
       potential_stuff_to_do = active_and_visible_projects.sort
     else
       potential_stuff_to_do = Issue.find(:all,
-                                         :include => [:status, :priority, :project],
+                                         :include => [:status, :priority, :project, :tracks_links],
                                          :conditions => conditions_for_available(user, filter),
                                          :order => "#{Issue.table_name}.created_on DESC")
     end
@@ -98,7 +98,7 @@ class StuffToDo < ActiveRecord::Base
       potential_stuff_to_do = active_and_visible_projects.sort
     else
       potential_stuff_to_do = Issue.find(:all,
-                                         :include => [:status, :priority, :project],
+                                         :include => [:status, :priority, :project, :tracks_links],
                                          :conditions => conditions_for_will_be_available(filter),
                                          :order => "#{Issue.table_name}.start_date ASC")
     end
@@ -272,8 +272,8 @@ class StuffToDo < ActiveRecord::Base
     end
    
     # ares individual conditions
-    conditions<< " AND #{IssueStatus.table_name}.id NOT IN (3,4,8) AND #{Project.table_name}.status <> 9 "
-    conditions<< " AND #{Issue.table_name}.start_date <= #{Date.today.to_s(:db)} OR #{Issue.table_name}.start_date IS NULL "
+    conditions<< " AND #{Issue.table_name}.status_id NOT IN (3,4,8) AND #{Project.table_name}.status <> 9 "
+    conditions<< " AND (#{Issue.table_name}.start_date <= '#{Date.today.to_s(:db)}' OR #{Issue.table_name}.start_date IS NULL) "
 
     conditions
   end
@@ -292,8 +292,8 @@ class StuffToDo < ActiveRecord::Base
     end
    
     # ares individual conditions
-    conditions << " AND #{IssueStatus.table_name}.id NOT IN (3,4,8) AND #{Project.table_name}.status <> 9 "
-    conditions << " AND #{Issue.table_name}.start_date > #{Date.today.to_s(:db)} AND #{Issue.table_name}.start_date IS NOT NULL "
+    conditions << " AND #{Issue.table_name}.status_id NOT IN (3,4,8) AND #{Project.table_name}.status <> 9 "
+    conditions << " AND #{Issue.table_name}.start_date > '#{Date.today.to_s(:db)}' AND #{Issue.table_name}.start_date IS NOT NULL "
 
     conditions
   end
