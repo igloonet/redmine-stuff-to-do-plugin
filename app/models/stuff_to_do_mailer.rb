@@ -11,10 +11,10 @@ class StuffToDoMailer < Mailer
 		@user = user
 		@number_of_next_items = number_of_next_items
 
-		mail (:subject   => "What's Recommended is below the threshold",
+		mail ({:subject   => "What's Recommended is below the threshold",
 		      :threshold => Setting.plugin_stuff_to_do_plugin['threshold'], 
 		      :count     => number_of_next_items, 
-		      :user      => user) do |format|
+		      :user      => user}) do |format|
 			format.text
 			format.html 
 		      end
